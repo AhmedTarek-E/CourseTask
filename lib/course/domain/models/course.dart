@@ -2,7 +2,7 @@ import 'package:equatable/equatable.dart';
 import 'package:inovola_task/course/domain/models/trainer.dart';
 
 class Course extends Equatable {
-  final String id;
+  final int id;
   final String name;
   final List<String> images;
   final bool isLiked;
