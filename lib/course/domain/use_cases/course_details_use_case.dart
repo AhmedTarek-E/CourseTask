@@ -2,11 +2,11 @@ import 'package:inovola_task/course/domain/models/course.dart';
 import 'package:inovola_task/course/domain/repositories/course_repository.dart';
 
 class CourseDetailsUseCase {
-  final CourseRepository repository;
+  final CourseRepository _repository;
 
-  CourseDetailsUseCase(this.repository);
+  CourseDetailsUseCase(this._repository);
 
   Future<Course> execute() {
-    return repository.getCourseDetails();
+    return _repository.getCourseDetails();
   }
 }
