@@ -9,7 +9,9 @@ import 'package:inovola_task/course/ui/widgets/course_info.dart';
 import 'package:inovola_task/course/ui/widgets/images_carousel.dart';
 import 'package:inovola_task/course/ui/widgets/trainer_info.dart';
 import 'package:inovola_task/utils/app_colors.dart';
+import 'package:inovola_task/utils/common.dart';
 import 'package:inovola_task/utils/dimensions.dart';
+import 'package:inovola_task/utils/retry_failed_loading.dart';
 import 'package:inovola_task/utils/text_styles.dart';
 import 'course_cubit.dart';
 
@@ -39,48 +41,77 @@ class CourseBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Expanded(
-          child: CustomScrollView(
-            slivers: [
-              _buildAppBar(context),
-              _buildBody(context),
+    return BlocListener<CourseCubit, CourseState>(
+      listener: (context, state) {
+        if (state.errorMessage != null) {
+          showErrorSnackBar(context, state.errorMessage ?? "");
+        }
+      },
+      child: Stack(
+        children: [
+          Column(
+            children: [
+              Expanded(
+                child: CustomScrollView(
+                  slivers: [
+                    _buildAppBar(context),
+                    _buildBody(context),
+                  ],
+                ),
+              ),
+              Container(
+                width: double.infinity,
+                color: AppColors.primaryColor,
+                child: TextButton(
+                  onPressed: () {
+                    //TODO implement
+                  },
+                  child: Text(
+                    "قم بالحجز الآن",
+                    style: TextStyles.semiBold(
+                      color: AppColors.textSecondaryColor,
+                      fontSize: Dimensions.large
+                    ),
+                  ),
+                  style: ButtonStyle(
+                      backgroundColor: MaterialStateColor.resolveWith(
+                          (states) => AppColors.primaryColor),
+                      padding: MaterialStateProperty.all(const EdgeInsets.symmetric(
+                        vertical: 16,
+                        horizontal: 16,
+                      )),
+                      shape: MaterialStateProperty.all(RoundedRectangleBorder(
+                          borderRadius:
+                              BorderRadius.all(Radius.circular(0)),
+                          ))),
+                ),
+              ),
+              Container(
+                color: AppColors.primaryColor,
+                height: MediaQuery.of(context).padding.bottom,
+              )
             ],
           ),
-        ),
-        Container(
-          width: double.infinity,
-          color: AppColors.primaryColor,
-          child: TextButton(
-            onPressed: () {
-              //TODO implement
-            },
-            child: Text(
-              "قم بالحجز الآن",
-              style: TextStyles.semiBold(
-                color: AppColors.textSecondaryColor,
-                fontSize: Dimensions.large
-              ),
+
+          Center(
+            child: BlocBuilder<CourseCubit, CourseState>(
+              builder: (context, state) {
+                if (state.courseDetails.isLoading) {
+                  return const CircularProgressIndicator.adaptive();
+                }
+
+                if (state.courseDetails.isFailure) {
+                  return RetryFailedLoading(onRetryPressed: () {
+                    BlocProvider.of<CourseCubit>(context)
+                        .onStarted();
+                  },);
+                }
+                return Container();
+              },
             ),
-            style: ButtonStyle(
-                backgroundColor: MaterialStateColor.resolveWith(
-                    (states) => AppColors.primaryColor),
-                padding: MaterialStateProperty.all(const EdgeInsets.symmetric(
-                  vertical: 16,
-                  horizontal: 16,
-                )),
-                shape: MaterialStateProperty.all(RoundedRectangleBorder(
-                    borderRadius:
-                        BorderRadius.all(Radius.circular(0)),
-                    ))),
           ),
-        ),
-        Container(
-          color: AppColors.primaryColor,
-          height: MediaQuery.of(context).padding.bottom,
-        )
-      ],
+        ],
+      ),
     );
   }
 
